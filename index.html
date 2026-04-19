@@ -316,9 +316,9 @@ body{
       <span>مركز المساعدة</span>
     </div>
     <div class="header-actions">
-      <button class="btn btn-ghost btn-sm" onclick="navigate('status')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><circle cx="6" cy="6" r="1" fill="currentColor"/><circle cx="6" cy="18" r="1" fill="currentColor"/></svg>
-        حالة السيرفر
+      <button class="btn btn-ghost btn-sm" onclick="navigate('hosts')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        الهوستات
       </button>
       <button class="btn btn-ghost btn-sm btn-icon" onclick="handleAdminAccess()" title="لوحة التحكم">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
@@ -330,7 +330,7 @@ body{
   <div id="view-home"></div>
   <div id="view-category" class="hidden"></div>
   <div id="view-article" class="hidden"></div>
-  <div id="view-status" class="hidden"></div>
+  <div id="view-hosts" class="hidden"></div>
   <div id="view-admin" class="hidden"></div>
 
   <!-- Footer -->
@@ -339,7 +339,7 @@ body{
   </footer>
 
   <!-- WhatsApp FAB -->
-  <a href="https://wa.me/966500000000" target="_blank" class="whatsapp-fab" title="تواصل معنا عبر واتساب">
+  <a id="whatsapp-fab" href="https://wa.me/966500000000" target="_blank" class="whatsapp-fab" title="تواصل معنا عبر واتساب">
     <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
   </a>
 
@@ -382,12 +382,15 @@ let state = {
   selectedArticle: null,
   articles: {},
   servers: {},
+  hosts: {},
   search: "",
   isAdmin: false,
   feedback: {},
   adminTab: "articles",
   editingArticle: null,
   editingServer: null,
+  editingHost: null,
+  settings: { whatsapp: "966500000000", storeName: "M7TV", storeUrl: "https://m7store.vip", whatsappMessage: "مرحباً، أحتاج مساعدة بخصوص اشتراك IPTV" },
 };
 
 const CATEGORIES = [
@@ -406,17 +409,34 @@ const ARTICLE_TYPES = [
 ];
 
 const DEMO_ARTICLES = {
-  "-demo1": { title: "تفعيل تطبيق IPTV Smarters على أندرويد", category: "android", type: "activation", steps: "1. حمّل تطبيق IPTV Smarters Pro من رابط التحميل أدناه\n2. افتح التطبيق واختر Login with Xtream Codes API\n3. أدخل بيانات الاشتراك المرسلة لك\n4. اضغط Add User واستمتع بالمشاهدة", videoUrl: "", downloadUrl: "https://m7store.vip", downloadLabel: "تحميل التطبيق", published: true, order: 1, createdAt: Date.now() },
-  "-demo2": { title: "تفعيل الاشتراك على iPhone و iPad", category: "apple", type: "activation", steps: "1. حمّل تطبيق IPTV Smarters من App Store\n2. افتح التطبيق وسجل الدخول\n3. أدخل بيانات السيرفر\n4. استمتع بالمشاهدة", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 1, createdAt: Date.now() },
-  "-demo3": { title: "إعداد IPTV على شاشات Samsung Smart TV", category: "smarttv", type: "activation", steps: "1. افتح Samsung App Store\n2. ابحث عن تطبيق Smart IPTV أو IPTV Smarters\n3. حمّل التطبيق وافتحه\n4. أدخل بيانات الاشتراك", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 1, createdAt: Date.now() },
-  "-demo4": { title: "مشاهدة عبر الكمبيوتر - VLC Player", category: "pc", type: "activation", steps: "1. حمّل برنامج VLC Media Player\n2. افتح البرنامج واختر Media > Open Network Stream\n3. الصق رابط M3U المرسل لك\n4. اضغط Play", videoUrl: "", downloadUrl: "https://www.videolan.org/vlc/", downloadLabel: "تحميل VLC", published: true, order: 1, createdAt: Date.now() },
-  "-demo5": { title: "حل مشكلة التقطيع وبطء البث", category: "android", type: "troubleshoot", steps: "1. تأكد من سرعة الإنترنت (يجب أن تكون 10 ميجا على الأقل)\n2. غيّر المشغل الداخلي للتطبيق من الإعدادات\n3. جرّب الاتصال بشبكة مختلفة\n4. أعد تشغيل الراوتر\n5. تواصل معنا عبر الواتساب إذا استمرت المشكلة", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 2, createdAt: Date.now() },
-  "-demo6": { title: "طريقة تجديد الاشتراك", category: "android", type: "renewal", steps: "1. ادخل على متجر ليون ستور واختر باقة التجديد\n2. أكمل عملية الدفع\n3. ستصلك رسالة بالكود الجديد\n4. افتح التطبيق وحدّث بيانات الاشتراك", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 3, createdAt: Date.now() },
+  "-a1": { title: "تفعيل IPTV Smarters Pro على جوال أندرويد", category: "android", type: "activation", steps: "1. حمّل تطبيق IPTV Smarters Pro بصيغة APK من زر التحميل بالأسفل\n2. بعد التحميل، افتح الملف واضغط على \"تثبيت\"\n3. قد يطلب منك الهاتف السماح بالتثبيت من مصادر غير معروفة — وافق عليها\n4. افتح التطبيق وستظهر لك شاشة البداية\n5. اختر خيار ADD YOUR PLAYLIST (via XC API) لإدخال بيانات اشتراكك\n6. ستظهر لك 4 خانات لملء بيانات اشتراكك التي وصلتك بعد الدفع:\n7. 📌 اسم القائمة (Any Name): أدخل أي اسم باللغة الإنجليزية\n8. 📌 اسم المستخدم (Username): أدخل اسم المستخدم الذي تم تزويدك به\n9. 📌 كلمة المرور (Password): ضع كلمة المرور التي تم تزويدك بها\n10. 📌 رابط السيرفر (Server URL): الصق رابط السيرفر كاملاً كما وصلك\n11. ⚠️ مهم: انسخ والصق البيانات تماماً كما هي لتجنب الفشل\n12. اضغط على Add User وانتظر تحميل القنوات\n13. ستظهر لك الأقسام: Live TV للقنوات المباشرة، Movies للأفلام، Series للمسلسلات\n14. 🎉 مبروك! استمتع بالمشاهدة بجودة تصل لـ 4K", videoUrl: "", downloadUrl: "https://smarterpro.net/android", downloadLabel: "تحميل APK للأندرويد", published: true, order: 1, createdAt: Date.now() },
+  "-a2": { title: "تفعيل IPTV على شاشة سمارت أندرويد (Xiaomi, Sony, وغيرها)", category: "android", type: "activation", steps: "1. من شاشتك الذكية، افتح متجر Google Play\n2. ابحث عن تطبيق Downloader وقم بتثبيته\n3. افتح تطبيق Downloader واضغط على تبويب HOME\n4. سيظهر لك حقل إدخال (URL Bar) لكتابة رابط التحميل\n5. أدخل كود التحميل المباشر: 2322234\n6. أو أدخل رابط تحميل ملف APK المباشر إذا كنت تتصفح من الشاشة\n7. سيبدأ تحميل ملف IPTV Smarters Pro بصيغة APK\n8. بعد اكتمال التحميل، اضغط \"تثبيت\" ووافق على الأذونات\n9. افتح التطبيق واختر ADD YOUR PLAYLIST (via XC API)\n10. أدخل بيانات اشتراكك (اسم المستخدم، كلمة المرور، رابط السيرفر)\n11. اضغط Add User وانتظر تحميل القائمة\n12. 🎉 تم! استمتع بالمشاهدة على شاشتك الكبيرة", videoUrl: "", downloadUrl: "https://smarterpro.net/smart-android-tv", downloadLabel: "تحميل APK للشاشات", published: true, order: 2, createdAt: Date.now() },
+  "-a3": { title: "حل مشكلة التقطيع وبطء البث", category: "android", type: "troubleshoot", steps: "1. 🌐 تأكد من سرعة الإنترنت — يُنصح بسرعة 10 ميجابت على الأقل للبث بجودة عالية\n2. ⚙️ غيّر المشغل الداخلي: ادخل إعدادات التطبيق > Player Selection > جرّب مشغل مختلف\n3. 📡 جرّب الاتصال بشبكة Wi-Fi مختلفة أو استخدم بيانات الجوال للمقارنة\n4. 🔄 أعد تشغيل الراوتر (افصله 30 ثانية ثم أعد تشغيله)\n5. 📺 إذا كنت تستخدم شاشة ذكية، جرّب توصيل كابل إيثرنت بدل الواي فاي\n6. 🧹 امسح ذاكرة التخزين المؤقت للتطبيق: الإعدادات > التطبيقات > IPTV Smarters > مسح الكاش\n7. 🔧 تأكد من أن التطبيق محدّث لآخر إصدار\n8. 📱 تواصل معنا عبر الواتساب إذا استمرت المشكلة", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 5, createdAt: Date.now() },
+  "-a4": { title: "طريقة تجديد الاشتراك", category: "android", type: "renewal", steps: "1. ادخل على متجرنا واختر باقة التجديد المناسبة لك\n2. أكمل عملية الدفع (تدعم: بطاقة بنكية، Apple Pay، STC Pay، تابي، تمارا)\n3. ستصلك بيانات التجديد الجديدة عبر الواتساب أو البريد الإلكتروني\n4. افتح تطبيق IPTV Smarters Pro على جهازك\n5. من القائمة الرئيسية، اضغط على أيقونة المستخدم أو Users\n6. احذف المستخدم القديم (اضغط مطولاً > Delete)\n7. أضف مستخدم جديد بالبيانات الجديدة التي وصلتك\n8. اضغط Add User وانتظر تحميل القنوات\n9. ✅ تم التجديد بنجاح!", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 6, createdAt: Date.now() },
+  "-b1": { title: "تفعيل IPTV على iPhone و iPad (Smarters Player Lite)", category: "apple", type: "activation", steps: "1. افتح App Store على جهاز iPhone أو iPad\n2. ابحث عن تطبيق Smarters Player Lite (التطبيق المعتمد حالياً لأجهزة iOS)\n3. اضغط \"تحميل\" وانتظر اكتمال التثبيت\n4. افتح التطبيق — ستظهر شاشة الترحيب\n5. وافق على شروط الاستخدام\n6. اختر Login with Xtream Codes API\n7. ستظهر لك خانات إدخال البيانات:\n8. 📌 Any Name: أدخل أي اسم تريده بالإنجليزية\n9. 📌 Username: اسم المستخدم الذي وصلك بعد الدفع\n10. 📌 Password: كلمة المرور التي وصلتك\n11. 📌 Server URL: رابط السيرفر كاملاً (http://...)\n12. ⚠️ مهم: انسخ البيانات من رسالة الواتساب والصقها — لا تكتبها يدوياً\n13. اضغط Add User\n14. انتظر تحميل القنوات والأقسام\n15. 🎉 جاهز! تصفح Live TV و Movies و Series", videoUrl: "", downloadUrl: "https://apps.apple.com/app/smarters-player-lite/id1628995509", downloadLabel: "تحميل من App Store", published: true, order: 1, createdAt: Date.now() },
+  "-b2": { title: "تفعيل IPTV على Apple TV", category: "apple", type: "activation", steps: "1. من شاشة Apple TV الرئيسية، افتح App Store\n2. ابحث عن Smarters Player Lite\n3. حمّل التطبيق وافتحه\n4. اختر Login with Xtream Codes API\n5. أدخل بيانات اشتراكك (Username, Password, Server URL)\n6. 💡 نصيحة: استخدم تطبيق Remote على الآيفون لتسهيل كتابة البيانات\n7. اضغط Add User وانتظر التحميل\n8. 🎉 استمتع بالمشاهدة على شاشتك الكبيرة!", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 2, createdAt: Date.now() },
+  "-b3": { title: "تفعيل IPTV على Mac (macOS)", category: "apple", type: "activation", steps: "1. حمّل ملف التثبيت (.dmg) لتطبيق IPTV Smarters Pro من الرابط أدناه\n2. افتح الملف المحمّل وثبّت التطبيق بسحبه لمجلد Applications\n3. افتح التطبيق من Launchpad أو مجلد التطبيقات\n4. قد يظهر تحذير أمان — اذهب لـ System Preferences > Security وأتح التطبيق\n5. اختر Login with Xtream Codes API\n6. أدخل بيانات اشتراكك (اسم المستخدم، كلمة المرور، رابط السيرفر)\n7. اضغط Add User\n8. 🎉 تم التفعيل على جهاز Mac!", videoUrl: "", downloadUrl: "https://smarterpro.net/mac", downloadLabel: "تحميل لنظام macOS (.dmg)", published: true, order: 3, createdAt: Date.now() },
+  "-c1": { title: "تفعيل IPTV على شاشة Samsung Smart TV (Tizen OS)", category: "smarttv", type: "activation", steps: "1. 📺 من ريموت شاشة سامسونج، اضغط على زر Home أو Source\n2. انتقل إلى أيقونة Apps (التطبيقات)\n3. في خانة البحث (أيقونة العدسة 🔍)، اكتب: IBO Player\n4. حمّل تطبيق IBO Player من متجر Samsung App Store\n5. افتح التطبيق — سيظهر لك على الشاشة:\n6. 📋 Device ID: رقم تعريف الجهاز\n7. 📋 Key: مفتاح التفعيل\n8. ⚠️ مهم جداً: أرسل لنا Device ID و Key عبر الواتساب\n9. سنقوم بتفعيل اشتراكك على هذا الجهاز خلال دقائق\n10. بعد إبلاغك بالتفعيل، أعد فتح التطبيق من جديد\n11. ستجد أن الاشتراك تم تفعيله وستبدأ القنوات بالتحميل\n12. 🎉 مبروك! استمتع بالمشاهدة على شاشة سامسونج", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 1, createdAt: Date.now() },
+  "-c2": { title: "تفعيل IPTV على شاشة LG Smart TV (WebOS)", category: "smarttv", type: "activation", steps: "1. 📺 من الريموت السحري (Magic Remote)، اضغط زر Home\n2. افتح متجر التطبيقات LG Content Store\n3. في قائمة البحث، ابحث عن: IPTV Smarters Pro\n4. اضغط Install لتثبيت التطبيق\n5. ⚠️ إذا لم تجد التطبيق، غيّر منطقة المتجر في إعدادات الشاشة\n6. بعد التثبيت، افتح التطبيق ووافق على الشروط\n7. اختر Login with Xtream Codes API\n8. أدخل بيانات اشتراكك:\n9. 📌 Username: اسم المستخدم\n10. 📌 Password: كلمة المرور\n11. 📌 Server URL: رابط السيرفر\n12. اضغط Add User\n13. 🔄 إذا لم يعمل Smarters، حمّل IBO Player بدلاً منه\n14. أرسل لنا Device ID و Key لتفعيله لك\n15. 🎉 تم! استمتع بالمشاهدة على شاشة LG", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 2, createdAt: Date.now() },
+  "-c3": { title: "حل مشكلة عدم ظهور التطبيق في متجر الشاشة", category: "smarttv", type: "troubleshoot", steps: "1. بعض الدول لا تدعم تطبيق IPTV Smarters في متجر الشاشة\n2. الحل: غيّر منطقة/بلد المتجر في إعدادات الشاشة\n3. Samsung: الإعدادات > عام > مدير النظام > اللغة والمنطقة > غيّر البلد\n4. LG: الإعدادات > عام > الموقع > بلد الخدمة > غيّر البلد\n5. جرّب دول مثل: المملكة المتحدة، ألمانيا، أو الولايات المتحدة\n6. بعد التغيير، أعد تشغيل الشاشة\n7. افتح المتجر وابحث مجدداً عن التطبيق\n8. إذا استمرت المشكلة، استخدم IBO Player كبديل\n9. 📱 تواصل معنا عبر الواتساب وسنساعدك", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 3, createdAt: Date.now() },
+  "-d1": { title: "تفعيل IPTV على كمبيوتر ويندوز (Windows)", category: "pc", type: "activation", steps: "1. حمّل ملف التثبيت (.exe) لتطبيق IPTV Smarters Pro من الزر أدناه\n2. افتح الملف المحمّل واتبع خطوات التثبيت\n3. وافق على الشروط > اختر مكان التثبيت > اضغط Install\n4. بعد اكتمال التثبيت، افتح التطبيق من قائمة Start\n5. ستظهر شاشة تسجيل الدخول\n6. اختر Login with Xtream Codes API\n7. أدخل بيانات اشتراكك:\n8. 📌 Any Name: أي اسم بالإنجليزية\n9. 📌 Username: اسم المستخدم\n10. 📌 Password: كلمة المرور\n11. 📌 Server URL: رابط السيرفر\n12. اضغط Add User وانتظر تحميل القنوات\n13. 🎉 تم! شاهد على الكمبيوتر بجودة عالية", videoUrl: "", downloadUrl: "https://smarterpro.net/windows", downloadLabel: "تحميل للويندوز (.exe)", published: true, order: 1, createdAt: Date.now() },
+  "-d2": { title: "المشاهدة عبر متصفح الويب (بدون تحميل)", category: "pc", type: "activation", steps: "1. يمكنك المشاهدة مباشرة من المتصفح بدون تحميل أي برنامج\n2. افتح المتصفح (Chrome أو Firefox أو Edge)\n3. ادخل على رابط مشغل الويب الخاص بـ IPTV Smarters\n4. اختر طريقة الدخول: Xtream Codes API\n5. أدخل بيانات اشتراكك (Username, Password, Server URL)\n6. اضغط Login\n7. تصفّح القنوات والأفلام والمسلسلات مباشرة من المتصفح\n8. 💡 مثالي للاستخدام السريع أو على أجهزة العمل", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 2, createdAt: Date.now() },
+  "-e1": { title: "ما هو IPTV وكيف يعمل؟", category: "android", type: "general", steps: "1. IPTV هو اختصار لـ Internet Protocol Television\n2. تقنية تسمح بنقل القنوات التلفزيونية عبر الإنترنت بدلاً من البث الفضائي\n3. بدلاً من استقبال الإشارة من طبق، تستقبلها عبر اتصالك بالإنترنت\n4. شاهد على أي جهاز ذكي: هاتف، تابلت، كمبيوتر، أو شاشة ذكية\n5. المحتوى: القنوات المباشرة (Live TV)، الأفلام والمسلسلات (VOD)، والرياضة\n6. نحن نقدم اشتراك IPTV بجودة تصل لـ 4K بدون تقطيع\n7. الاشتراك يشمل: تطبيق مجاني + بيانات دخول + دعم فني كامل", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 10, createdAt: Date.now() },
+  "-e2": { title: "بيانات الاشتراك — ما هي وأين أجدها؟", category: "android", type: "general", steps: "1. بعد إتمام الشراء، ستصلك بيانات الاشتراك خلال دقائق\n2. البيانات تصلك عبر الواتساب أو البريد الإلكتروني\n3. البيانات تتكون من:\n4. 📌 Username (اسم المستخدم): مثال user12345\n5. 📌 Password (كلمة المرور): مثال pass98765\n6. 📌 Server URL (رابط السيرفر): مثال http://server.example.com:8080\n7. ⚠️ مهم جداً: انسخ والصق البيانات — لا تكتبها يدوياً\n8. استخدم هذه البيانات في أي تطبيق IPTV Smarters على أي جهاز\n9. إذا لم تصلك البيانات، تواصل معنا فوراً عبر الواتساب", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 11, createdAt: Date.now() },
+  "-e3": { title: "حل مشكلة فشل تسجيل الدخول", category: "android", type: "troubleshoot", steps: "1. تأكد من نسخ ولصق البيانات بدقة — حرف واحد خاطئ يسبب الفشل\n2. تأكد من عدم وجود مسافة زائدة قبل أو بعد اسم المستخدم\n3. تأكد أن رابط السيرفر كامل ويبدأ بـ http:// أو https://\n4. تأكد أن اشتراكك ساري المفعول ولم تنتهِ صلاحيته\n5. جرّب إغلاق التطبيق بالكامل وإعادة فتحه\n6. جرّب حذف المستخدم وإضافته من جديد\n7. تأكد من اتصالك بالإنترنت\n8. إذا استمرت المشكلة، أرسل لنا سكرين شوت عبر الواتساب", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 12, createdAt: Date.now() },
+  "-e4": { title: "حل مشكلة القائمة فارغة أو القنوات لا تظهر", category: "android", type: "troubleshoot", steps: "1. قد يكون السبب بطء الاتصال — انتظر دقيقة أو دقيقتين\n2. جرّب إغلاق التطبيق وإعادة فتحه\n3. تأكد من صحة رابط السيرفر (Server URL)\n4. حدّث القائمة: الإعدادات > Refresh/Update Playlist\n5. امسح ذاكرة التخزين المؤقت (Cache) من إعدادات الجهاز\n6. تأكد من أن الاشتراك لم ينتهِ\n7. 📱 تواصل معنا عبر الواتساب — سنتحقق من اشتراكك فوراً", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 13, createdAt: Date.now() },
+  "-e5": { title: "كيف أغيّر لغة القنوات أو الصوت؟", category: "android", type: "troubleshoot", steps: "1. أثناء مشاهدة أي قناة، اضغط على أيقونة الإعدادات ⚙️\n2. ابحث عن خيار Audio Track أو مسار الصوت\n3. ستظهر قائمة باللغات المتوفرة للقناة الحالية\n4. اختر اللغة المطلوبة (عربي، إنجليزي، فرنسي)\n5. بعض القنوات توفر لغة واحدة فقط حسب مصدر البث\n6. لتغيير لغة واجهة التطبيق: Settings > Language > العربية", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 14, createdAt: Date.now() },
 };
 
 const DEMO_SERVERS = {
   "-s1": { name: "السيرفر الرئيسي", status: "online", lastCheck: Date.now() },
   "-s2": { name: "سيرفر الاحتياط", status: "online", lastCheck: Date.now() },
+};
+
+const DEMO_HOSTS = {
+  "-h1": { name: "السيرفر الرئيسي", url: "http://main.m7tv.vip:8080", port: "8080", note: "السيرفر الأساسي — استخدمه أولاً", active: true, order: 1, createdAt: Date.now() },
+  "-h2": { name: "السيرفر الاحتياطي", url: "http://backup.m7tv.vip:8080", port: "8080", note: "استخدمه في حالة توقف السيرفر الرئيسي", active: true, order: 2, createdAt: Date.now() },
+  "-h3": { name: "سيرفر DNS", url: "http://dns.m7tv.vip:2086", port: "2086", note: "في حالة حجب السيرفرات عند مزود الخدمة", active: true, order: 3, createdAt: Date.now() },
 };
 
 const ADMIN_PIN = "9999";
@@ -435,6 +455,8 @@ const ICONS = {
   edit: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
   trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>`,
   plus: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 5v14M5 12h14"/></svg>`,
+  copy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>`,
+  link: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>`,
 };
 
 // ─── Helpers ───
@@ -471,13 +493,14 @@ function navigate(view, cat, article) {
   state.search = "";
   state.editingArticle = null;
   state.editingServer = null;
+  state.editingHost = null;
   render();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 // ─── Render ───
 function render() {
-  const views = ["home","category","article","status","admin"];
+  const views = ["home","category","article","hosts","admin"];
   views.forEach(v => {
     const el = document.getElementById(`view-${v}`);
     if (el) el.classList.toggle("hidden", state.view !== v);
@@ -486,7 +509,7 @@ function render() {
   if (state.view === "home") renderHome();
   else if (state.view === "category") renderCategory();
   else if (state.view === "article") renderArticle();
-  else if (state.view === "status") renderStatus();
+  else if (state.view === "hosts") renderHosts();
   else if (state.view === "admin") renderAdmin();
 }
 
@@ -530,13 +553,32 @@ function renderHome() {
     });
     html += `</section>`;
 
-    // Server status pills
-    html += `<div class="content-area" style="margin-top:20px"><div class="section-header"><h2 style="font-size:1.2rem">حالة السيرفرات</h2></div><div class="status-pills">`;
-    Object.entries(state.servers).forEach(([id, s]) => {
-      const stLabel = s.status === "online" ? "يعمل" : s.status === "offline" ? "متوقف" : "صيانة";
-      html += `<div class="status-pill"><div class="status-dot status-${s.status}"></div><span class="name">${s.name}</span><span class="state">${stLabel}</span></div>`;
-    });
-    html += `</div></div>`;
+    // Hosts section on home
+    const activeHosts = Object.entries(state.hosts).filter(([,h]) => h.active).sort(([,a],[,b]) => (a.order||0) - (b.order||0));
+    if (activeHosts.length > 0) {
+      html += `<div class="content-area" style="margin-top:20px">
+        <div class="section-header" style="justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="color:var(--accent)">${ICONS.link}</span>
+            <h2 style="font-size:1.2rem">روابط السيرفرات (Hosts)</h2>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="navigate('hosts')" style="font-size:0.82rem">عرض الكل</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">`;
+      activeHosts.forEach(([id, h]) => {
+        html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:200px">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--success);flex-shrink:0"></div>
+            <div>
+              <div style="font-weight:700;font-size:0.92rem">${h.name}</div>
+              <code style="font-size:0.8rem;color:var(--accent);direction:ltr;display:inline-block">${h.url}</code>
+            </div>
+          </div>
+          <button onclick="copyHost('${id}','${h.url.replace(/'/g,"\\'")}')" id="copy-btn-${id}" style="display:flex;align-items:center;gap:6px;padding:8px 18px;border-radius:10px;border:1px solid var(--border-accent);background:rgba(245,194,0,0.06);color:var(--accent);cursor:pointer;font-family:inherit;font-weight:700;font-size:0.82rem;transition:all 0.2s;white-space:nowrap">${ICONS.copy} نسخ</button>
+        </div>`;
+      });
+      html += `</div></div>`;
+    }
   }
 
   el.innerHTML = html;
@@ -599,6 +641,14 @@ function renderArticle() {
       </div>
       <h2>${art.title}</h2>`;
 
+  // Info card showing device & app
+  const catObj = CATEGORIES.find(c=>c.id===state.selectedCat);
+  const catColor = catObj ? catObj.color : 'var(--accent)';
+  html += `<div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;background:${catColor}12;border:1px solid ${catColor}30;border-radius:50px;font-size:0.85rem;font-weight:600;color:${catColor}">${ICONS[catObj?.icon||'android']} ${catObj?.label||''}</div>
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(245,194,0,0.08);border:1px solid rgba(245,194,0,0.2);border-radius:50px;font-size:0.85rem;color:var(--accent);font-weight:600">📱 IPTV Smarters Pro</div>
+  </div>`;
+
   if (embedUrl) {
     html += `<div style="margin:0 0 28px;border-radius:var(--radius-sm);overflow:hidden;aspect-ratio:16/9">
       <iframe src="${embedUrl}" style="width:100%;height:100%;border:none" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>
@@ -607,9 +657,48 @@ function renderArticle() {
 
   html += `<div class="step-list">`;
   steps.forEach((s, i) => {
-    html += `<div class="step-item"><div class="step-num">${i+1}</div><div class="step-text">${s}</div></div>`;
+    const isHighlight = s.includes('📌') || s.includes('⚠️');
+    const isSuccess = s.includes('🎉') || s.includes('✅');
+    const isTip = s.includes('💡');
+    let stepBg = '';
+    let stepBorder = '';
+    if (isHighlight) { stepBg = 'background:rgba(245,194,0,0.06);padding:12px 16px;border-radius:12px;margin:-4px 0;'; stepBorder = 'border-right:3px solid var(--accent);'; }
+    if (isSuccess) { stepBg = 'background:rgba(34,197,94,0.08);padding:12px 16px;border-radius:12px;margin:-4px 0;'; stepBorder = 'border-right:3px solid var(--success);'; }
+    if (isTip) { stepBg = 'background:rgba(0,180,216,0.06);padding:12px 16px;border-radius:12px;margin:-4px 0;'; stepBorder = 'border-right:3px solid var(--accent2);'; }
+    html += `<div class="step-item" style="${stepBg}${stepBorder}"><div class="step-num" style="${isSuccess?'background:linear-gradient(135deg,var(--success),#16a34a)':''}${isTip?'background:linear-gradient(135deg,var(--accent2),#0891b2)':''}">${isSuccess?'✓':isTip?'💡':(i+1)}</div><div class="step-text">${s}</div></div>`;
   });
   html += `</div>`;
+
+  // Visual reference card for activation articles
+  if (art.type === 'activation') {
+    html += `<div style="margin-top:24px;padding:24px;background:linear-gradient(135deg,rgba(245,194,0,0.05),rgba(0,180,216,0.03));border:1px solid var(--border-accent);border-radius:var(--radius)">
+      <h4 style="margin-bottom:16px;font-weight:700;color:var(--accent)">📋 بيانات الاشتراك المطلوبة</h4>
+      <div style="display:grid;gap:10px">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-secondary);border-radius:10px;border:1px solid var(--border)">
+          <span style="background:var(--accent);color:#000;padding:2px 10px;border-radius:6px;font-weight:800;font-size:0.75rem">1</span>
+          <div><div style="font-weight:700;font-size:0.88rem">Any Name</div><div style="color:var(--text-muted);font-size:0.8rem">أي اسم تريده بالإنجليزية</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-secondary);border-radius:10px;border:1px solid var(--border)">
+          <span style="background:var(--accent);color:#000;padding:2px 10px;border-radius:6px;font-weight:800;font-size:0.75rem">2</span>
+          <div><div style="font-weight:700;font-size:0.88rem">Username</div><div style="color:var(--text-muted);font-size:0.8rem">اسم المستخدم الذي وصلك</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-secondary);border-radius:10px;border:1px solid var(--border)">
+          <span style="background:var(--accent);color:#000;padding:2px 10px;border-radius:6px;font-weight:800;font-size:0.75rem">3</span>
+          <div><div style="font-weight:700;font-size:0.88rem">Password</div><div style="color:var(--text-muted);font-size:0.8rem">كلمة المرور التي وصلتك</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--bg-secondary);border-radius:10px;border:1px solid var(--border)">
+          <span style="background:var(--accent);color:#000;padding:2px 10px;border-radius:6px;font-weight:800;font-size:0.75rem">4</span>
+          <div><div style="font-weight:700;font-size:0.88rem">Server URL</div><div style="color:var(--text-muted);font-size:0.8rem">رابط السيرفر كاملاً http://...</div></div>
+        </div>
+      </div>
+      <p style="margin-top:14px;padding:10px 14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.15);border-radius:8px;font-size:0.85rem;color:#ef4444;font-weight:600">⚠️ انسخ والصق البيانات كما هي — حرف واحد خاطئ يمنع الدخول</p>
+    </div>`;
+  }
+
+  // Source reference
+  html += `<div style="margin-top:20px;padding:14px 18px;background:var(--bg-secondary);border-radius:10px;border:1px solid var(--border);display:flex;align-items:center;gap:10px;font-size:0.82rem;color:var(--text-muted)">
+    <span style="font-size:1.2rem">📖</span> المصدر: <a href="https://smarterpro.net/activate-guide" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">دليل التفعيل الرسمي — smarterpro.net</a>
+  </div>`;
 
   if (art.downloadUrl) {
     html += `<div class="article-actions"><a href="${art.downloadUrl}" target="_blank" class="btn btn-primary" style="text-decoration:none">${ICONS.download} ${art.downloadLabel || "تحميل"}</a></div>`;
@@ -635,29 +724,91 @@ async function voteFeedback(artId, vote) {
   renderArticle();
 }
 
-function renderStatus() {
-  const el = document.getElementById("view-status");
+// ─── Hosts Page ───
+function renderHosts() {
+  const el = document.getElementById("view-hosts");
+  const activeHosts = Object.entries(state.hosts).filter(([,h]) => h.active).sort(([,a],[,b]) => (a.order||0) - (b.order||0));
+
   let html = `<div class="content-area" style="padding-top:32px">
-    <div class="breadcrumb"><button onclick="navigate('home')">${ICONS.home} الرئيسية</button><span>/</span><span>حالة السيرفرات</span></div>
-    <div class="section-header"><h2>حالة السيرفرات</h2></div>
-    <p style="color:var(--text-secondary);margin-bottom:24px">تعرض هذه الصفحة حالة جميع سيرفراتنا بشكل لحظي</p>
-    <div class="status-grid">`;
-
-  Object.entries(state.servers).forEach(([id, s]) => {
-    const stLabel = s.status === "online" ? "يعمل ✓" : s.status === "offline" ? "متوقف ✗" : "صيانة ⚠";
-    const stColor = s.status === "online" ? "var(--success)" : s.status === "offline" ? "var(--danger)" : "var(--accent)";
-    const stBg = s.status === "online" ? "rgba(34,197,94,0.12)" : s.status === "offline" ? "rgba(239,68,68,0.12)" : "rgba(245,194,0,0.12)";
-    html += `<div class="status-card fade-up">
-      <div class="status-info"><div class="status-dot status-${s.status}"></div><div><div class="status-label">${s.name}</div><div class="status-time">آخر فحص: ${new Date(s.lastCheck).toLocaleString("ar-SA")}</div></div></div>
-      <span style="padding:6px 16px;border-radius:20px;font-size:0.82rem;font-weight:700;background:${stBg};color:${stColor}">${stLabel}</span>
+    <div class="breadcrumb"><button onclick="navigate('home')">${ICONS.home} الرئيسية</button><span>/</span><span>الهوستات وروابط السيرفرات</span></div>
+    <div style="text-align:center;margin-bottom:32px">
+      <h2 style="font-size:1.6rem;font-weight:900;margin-bottom:8px">🔗 روابط السيرفرات (Hosts)</h2>
+      <p style="color:var(--text-secondary);max-width:500px;margin:0 auto">انسخ رابط السيرفر واستخدمه في خانة Server URL عند تفعيل اشتراكك</p>
     </div>`;
-  });
 
-  html += `</div></div>`;
+  if (activeHosts.length === 0) {
+    html += `<div class="empty-state"><p>لا توجد روابط متاحة حالياً</p></div>`;
+  } else {
+    html += `<div style="display:flex;flex-direction:column;gap:16px">`;
+    activeHosts.forEach(([id, h], idx) => {
+      html += `<div class="fade-up delay-${Math.min(idx+1,4)}" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;right:0;width:4px;height:100%;background:linear-gradient(180deg,var(--accent),var(--accent2))"></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <span style="padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:700;background:rgba(245,194,0,0.12);color:var(--accent)">HOST ${idx+1}</span>
+              <h3 style="font-weight:700;font-size:1.1rem">${h.name}</h3>
+            </div>
+            ${h.note ? `<p style="color:var(--text-secondary);font-size:0.88rem;margin-bottom:12px">${h.note}</p>` : ''}
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <code id="host-url-${id}" style="flex:1;padding:12px 16px;background:var(--bg-primary);border:1px solid var(--border);border-radius:10px;font-family:monospace;font-size:0.92rem;color:var(--accent);direction:ltr;text-align:left;word-break:break-all;user-select:all;cursor:text">${h.url}</code>
+            </div>
+            ${h.port ? `<div style="display:flex;align-items:center;gap:8px;color:var(--text-muted);font-size:0.82rem"><span>المنفذ (Port):</span><code style="padding:2px 10px;background:var(--bg-secondary);border-radius:6px;font-family:monospace;color:var(--text-primary);direction:ltr">${h.port}</code></div>` : ''}
+          </div>
+          <button onclick="copyHost('${id}','${h.url.replace(/'/g,"\\'")}')" id="copy-btn-${id}" style="display:flex;align-items:center;gap:8px;padding:12px 24px;border-radius:12px;border:1px solid var(--border-accent);background:linear-gradient(135deg,rgba(245,194,0,0.08),rgba(245,194,0,0.02));color:var(--accent);cursor:pointer;font-family:inherit;font-weight:700;font-size:0.9rem;transition:all 0.2s;white-space:nowrap">${ICONS.copy} نسخ الرابط</button>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Usage instruction
+  html += `<div style="margin-top:32px;padding:24px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius)">
+    <h3 style="font-weight:700;margin-bottom:16px;color:var(--accent)">📖 كيف تستخدم الهوست؟</h3>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;gap:12px;align-items:center"><span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#e6a800);color:#000;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.8rem;flex-shrink:0">1</span><span>اضغط على زر <strong>"نسخ الرابط"</strong> بجانب السيرفر</span></div>
+      <div style="display:flex;gap:12px;align-items:center"><span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#e6a800);color:#000;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.8rem;flex-shrink:0">2</span><span>افتح تطبيق <strong>IPTV Smarters Pro</strong> على جهازك</span></div>
+      <div style="display:flex;gap:12px;align-items:center"><span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#e6a800);color:#000;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.8rem;flex-shrink:0">3</span><span>الصق الرابط في خانة <strong>Server URL</strong></span></div>
+      <div style="display:flex;gap:12px;align-items:center"><span style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--success),#16a34a);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.8rem;flex-shrink:0">✓</span><span>أضف باقي بيانات الاشتراك واضغط <strong>Add User</strong></span></div>
+    </div>
+  </div>`;
+
+  html += `</div>`;
   el.innerHTML = html;
 }
 
-// ─── Admin Panel ───
+function copyHost(id, url) {
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('copy-btn-' + id);
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✅ تم النسخ!';
+      btn.style.background = 'rgba(34,197,94,0.15)';
+      btn.style.borderColor = 'rgba(34,197,94,0.3)';
+      btn.style.color = 'var(--success)';
+      setTimeout(() => {
+        btn.innerHTML = orig;
+        btn.style.background = '';
+        btn.style.borderColor = '';
+        btn.style.color = '';
+      }, 2000);
+    }
+  }).catch(() => {
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = document.getElementById('copy-btn-' + id);
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✅ تم النسخ!';
+      setTimeout(() => { btn.innerHTML = orig; }, 2000);
+    }
+  });
+}
 function handleAdminAccess() {
   if (state.isAdmin) { navigate("admin"); return; }
   document.getElementById("pin-modal").classList.remove("hidden");
@@ -700,11 +851,14 @@ function renderAdmin() {
       <div class="stat-card"><div class="stat-value">${pubCount}</div><div class="stat-label">مقالات منشورة</div></div>
       <div class="stat-card"><div class="stat-value">${yesCount}</div><div class="stat-label">تقييمات إيجابية</div></div>
       <div class="stat-card"><div class="stat-value">${Object.keys(state.servers).length}</div><div class="stat-label">سيرفرات</div></div>
+      <div class="stat-card"><div class="stat-value">${Object.values(state.hosts).filter(h=>h.active).length}</div><div class="stat-label">هوستات فعّالة</div></div>
     </div>
     <div class="admin-tabs">
       <button class="admin-tab ${state.adminTab==='articles'?'active':''}" onclick="switchAdminTab('articles')">المقالات</button>
+      <button class="admin-tab ${state.adminTab==='hosts'?'active':''}" onclick="switchAdminTab('hosts')">الهوستات</button>
       <button class="admin-tab ${state.adminTab==='servers'?'active':''}" onclick="switchAdminTab('servers')">السيرفرات</button>
       <button class="admin-tab ${state.adminTab==='feedback'?'active':''}" onclick="switchAdminTab('feedback')">التقييمات</button>
+      <button class="admin-tab ${state.adminTab==='settings'?'active':''}" onclick="switchAdminTab('settings')">⚙️ الإعدادات</button>
     </div>`;
 
   if (state.adminTab === "articles") {
@@ -747,6 +901,34 @@ function renderAdmin() {
       });
       html += `</div>`;
     }
+  } else if (state.adminTab === "hosts") {
+    if (state.editingHost !== null) {
+      html += renderHostForm();
+    } else {
+      html += `<div style="display:flex;justify-content:flex-end;margin-bottom:16px"><button class="btn btn-primary btn-sm" onclick="startEditHost(null)">${ICONS.plus} إضافة هوست</button></div>`;
+      html += `<div style="display:flex;flex-direction:column;gap:12px">`;
+      Object.entries(state.hosts).sort(([,a],[,b])=>(a.order||0)-(b.order||0)).forEach(([id, h]) => {
+        html += `<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:200px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+              <span style="width:10px;height:10px;border-radius:50%;background:${h.active?'var(--success)':'var(--text-muted)'};flex-shrink:0"></span>
+              <strong>${h.name}</strong>
+              <span style="padding:2px 8px;border-radius:12px;font-size:0.7rem;font-weight:700;background:${h.active?'rgba(34,197,94,0.12)':'rgba(139,149,176,0.12)'};color:${h.active?'var(--success)':'var(--text-muted)'}">${h.active?'فعّال':'معطّل'}</span>
+            </div>
+            <code style="font-size:0.82rem;color:var(--accent);direction:ltr;display:inline-block">${h.url}</code>
+            ${h.note?`<div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px">${h.note}</div>`:''}
+          </div>
+          <div class="actions">
+            <button class="btn btn-ghost btn-icon btn-sm" onclick="startEditHost('${id}')">${ICONS.edit}</button>
+            <button class="btn btn-danger btn-icon btn-sm" onclick="deleteHost('${id}')">${ICONS.trash}</button>
+          </div>
+        </div>`;
+      });
+      if (Object.keys(state.hosts).length === 0) {
+        html += `<div class="empty-state"><p>لا توجد هوستات — أضف أول هوست</p></div>`;
+      }
+      html += `</div>`;
+    }
   } else if (state.adminTab === "feedback") {
     html += `<div style="background:var(--bg-card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden"><table class="admin-table"><thead><tr><th>المقال</th><th>التقييم</th></tr></thead><tbody>`;
     const fbEntries = Object.entries(state.feedback);
@@ -762,6 +944,36 @@ function renderAdmin() {
       });
     }
     html += `</tbody></table></div>`;
+  } else if (state.adminTab === "settings") {
+    const s = state.settings;
+    html += `<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px">
+      <h3 style="margin-bottom:24px;font-weight:700">⚙️ إعدادات الموقع</h3>
+      <div class="form-group">
+        <label>رقم واتساب الدعم الفني (بدون + أو مسافات)</label>
+        <input id="set-whatsapp" value="${s.whatsapp||''}" placeholder="966500000000" style="direction:ltr;text-align:left;font-size:1.1rem;font-weight:600;letter-spacing:1px">
+        <div style="margin-top:6px;font-size:0.8rem;color:var(--text-muted)">💡 مثال: 966512345678 — يظهر كزر واتساب عائم في كل صفحات الموقع</div>
+      </div>
+      <div class="form-group">
+        <label>رسالة واتساب التلقائية (تظهر عند الضغط على الزر)</label>
+        <input id="set-wamsg" value="${s.whatsappMessage||''}" placeholder="مرحباً، أحتاج مساعدة">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>اسم المتجر</label>
+          <input id="set-storename" value="${s.storeName||''}" placeholder="M7TV">
+        </div>
+        <div class="form-group">
+          <label>رابط المتجر</label>
+          <input id="set-storeurl" value="${s.storeUrl||''}" placeholder="https://m7store.vip" style="direction:ltr;text-align:left">
+        </div>
+      </div>
+      <div style="margin-top:8px;padding:16px;background:var(--bg-secondary);border-radius:12px;border:1px solid var(--border)">
+        <div style="font-weight:600;margin-bottom:8px;font-size:0.9rem;color:var(--text-secondary)">📱 معاينة رابط الواتساب:</div>
+        <a id="set-preview" href="https://wa.me/${s.whatsapp}?text=${encodeURIComponent(s.whatsappMessage||'')}" target="_blank" style="color:var(--accent);word-break:break-all;font-size:0.85rem;direction:ltr;display:block">https://wa.me/${s.whatsapp}?text=${encodeURIComponent(s.whatsappMessage||'')}</a>
+      </div>
+      <button class="btn btn-primary" style="margin-top:20px" onclick="saveSettings()">💾 حفظ الإعدادات</button>
+      <span id="set-saved" style="margin-right:12px;color:var(--success);font-weight:600;font-size:0.88rem;display:none">✅ تم الحفظ!</span>
+    </div>`;
   }
 
   html += `</div>`;
@@ -772,6 +984,7 @@ function switchAdminTab(tab) {
   state.adminTab = tab;
   state.editingArticle = null;
   state.editingServer = null;
+  state.editingHost = null;
   renderAdmin();
 }
 
@@ -909,6 +1122,97 @@ async function deleteServer(id) {
   renderAdmin();
 }
 
+// ─── Host CRUD ───
+function startEditHost(id) {
+  if (id) {
+    state.editingHost = { ...state.hosts[id], _id: id };
+  } else {
+    state.editingHost = { name:"", url:"", port:"8080", note:"", active:true, order:1 };
+  }
+  renderAdmin();
+}
+
+function renderHostForm() {
+  const h = state.editingHost;
+  const isEdit = h._id ? true : false;
+  return `<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px">
+    <h3 style="margin-bottom:20px;font-weight:700">${isEdit?'تعديل الهوست':'إضافة هوست جديد'}</h3>
+    <div class="form-group"><label>اسم الهوست</label><input id="hf-name" value="${h.name}" placeholder="مثال: السيرفر الرئيسي"></div>
+    <div class="form-group"><label>رابط الهوست (Server URL)</label><input id="hf-url" value="${h.url}" placeholder="http://main.m7tv.vip:8080" style="direction:ltr;text-align:left"></div>
+    <div class="form-row">
+      <div class="form-group"><label>المنفذ (Port)</label><input id="hf-port" value="${h.port||''}" placeholder="8080" style="direction:ltr;text-align:left"></div>
+      <div class="form-group"><label>ترتيب العرض</label><input id="hf-order" type="number" value="${h.order||1}"></div>
+    </div>
+    <div class="form-group"><label>ملاحظة للعميل (اختياري)</label><input id="hf-note" value="${h.note||''}" placeholder="مثال: استخدمه في حالة توقف السيرفر الرئيسي"></div>
+    <div class="toggle-row"><span style="font-weight:600">فعّال (ظاهر للعملاء)</span><button id="hf-active" class="toggle ${h.active?'on':'off'}" onclick="toggleHostActive()"></button></div>
+    <div style="display:flex;gap:12px;margin-top:20px">
+      <button class="btn btn-primary" onclick="saveHost()">حفظ</button>
+      <button class="btn btn-ghost" onclick="state.editingHost=null;renderAdmin()">إلغاء</button>
+    </div>
+  </div>`;
+}
+
+function toggleHostActive() {
+  state.editingHost.active = !state.editingHost.active;
+  renderAdmin();
+}
+
+async function saveHost() {
+  const h = state.editingHost;
+  const data = {
+    name: document.getElementById("hf-name").value,
+    url: document.getElementById("hf-url").value,
+    port: document.getElementById("hf-port").value,
+    note: document.getElementById("hf-note").value,
+    order: parseInt(document.getElementById("hf-order").value) || 1,
+    active: h.active,
+    createdAt: h.createdAt || Date.now(),
+  };
+  if (!data.name.trim() || !data.url.trim()) return;
+
+  if (h._id) {
+    await fbSet(`hosts/${h._id}`, data);
+    state.hosts[h._id] = data;
+  } else {
+    const res = await fbPush("hosts", data);
+    state.hosts[res.name] = data;
+  }
+  state.editingHost = null;
+  renderAdmin();
+}
+
+async function deleteHost(id) {
+  if (!confirm("هل تريد حذف هذا الهوست؟")) return;
+  await fbDelete(`hosts/${id}`);
+  delete state.hosts[id];
+  renderAdmin();
+}
+
+// ─── Settings ───
+async function saveSettings() {
+  const data = {
+    whatsapp: document.getElementById("set-whatsapp").value.replace(/\s+/g,'').replace(/^\+/,''),
+    whatsappMessage: document.getElementById("set-wamsg").value,
+    storeName: document.getElementById("set-storename").value,
+    storeUrl: document.getElementById("set-storeurl").value,
+  };
+  state.settings = data;
+  await fbSet("settings", data);
+  updateWhatsAppFab();
+  const saved = document.getElementById("set-saved");
+  if (saved) { saved.style.display = "inline"; setTimeout(() => { saved.style.display = "none"; }, 3000); }
+  renderAdmin();
+}
+
+function updateWhatsAppFab() {
+  const fab = document.getElementById("whatsapp-fab");
+  if (fab && state.settings.whatsapp) {
+    let url = "https://wa.me/" + state.settings.whatsapp;
+    if (state.settings.whatsappMessage) url += "?text=" + encodeURIComponent(state.settings.whatsappMessage);
+    fab.href = url;
+  }
+}
+
 // ─── Init ───
 async function init() {
   const arts = await fbGet("articles");
@@ -927,9 +1231,21 @@ async function init() {
     state.servers = DEMO_SERVERS;
   }
 
+  const hsts = await fbGet("hosts");
+  if (hsts && Object.keys(hsts).length > 0) {
+    state.hosts = hsts;
+  } else {
+    await fbSet("hosts", DEMO_HOSTS);
+    state.hosts = DEMO_HOSTS;
+  }
+
   const fb = await fbGet("feedback");
   if (fb) state.feedback = fb;
 
+  const settings = await fbGet("settings");
+  if (settings) state.settings = { ...state.settings, ...settings };
+
+  updateWhatsAppFab();
   render();
 }
 
