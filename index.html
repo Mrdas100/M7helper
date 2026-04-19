@@ -345,6 +345,17 @@ body{
 
   <!-- PIN Modal -->
   <div id="pin-modal" class="modal-overlay hidden" onclick="closePinModal(event)">
+
+  <!-- App Tutorial Modal -->
+  <div id="app-modal" class="modal-overlay hidden" onclick="closeAppModal(event)">
+    <div class="modal" style="max-width:600px;text-align:right;padding:32px" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <h3 id="app-modal-title" style="font-size:1.3rem"></h3>
+        <button onclick="closeAppModal()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.4rem;padding:4px">✕</button>
+      </div>
+      <div id="app-modal-body"></div>
+    </div>
+  </div>
     <div class="modal" onclick="event.stopPropagation()">
       <h3>🔒 لوحة التحكم</h3>
       <p>أدخل رمز الدخول</p>
@@ -390,6 +401,9 @@ let state = {
   editingArticle: null,
   editingServer: null,
   editingHost: null,
+  editingApp: null,
+  apps: {},
+  viewingApp: null,
   settings: { whatsapp: "966500000000", storeName: "M7TV", storeUrl: "https://m7store.vip", whatsappMessage: "مرحباً، أحتاج مساعدة بخصوص اشتراك IPTV" },
 };
 
@@ -409,17 +423,17 @@ const ARTICLE_TYPES = [
 ];
 
 const DEMO_ARTICLES = {
-  "-a1": { title: "تفعيل IPTV Smarters Pro على جوال أندرويد", category: "android", type: "activation", steps: "1. حمّل تطبيق IPTV Smarters Pro بصيغة APK من زر التحميل بالأسفل\n2. بعد التحميل، افتح الملف واضغط على \"تثبيت\"\n3. قد يطلب منك الهاتف السماح بالتثبيت من مصادر غير معروفة — وافق عليها\n4. افتح التطبيق وستظهر لك شاشة البداية\n5. اختر خيار ADD YOUR PLAYLIST (via XC API) لإدخال بيانات اشتراكك\n6. ستظهر لك 4 خانات لملء بيانات اشتراكك التي وصلتك بعد الدفع:\n7. 📌 اسم القائمة (Any Name): أدخل أي اسم باللغة الإنجليزية\n8. 📌 اسم المستخدم (Username): أدخل اسم المستخدم الذي تم تزويدك به\n9. 📌 كلمة المرور (Password): ضع كلمة المرور التي تم تزويدك بها\n10. 📌 رابط السيرفر (Server URL): الصق رابط السيرفر كاملاً كما وصلك\n11. ⚠️ مهم: انسخ والصق البيانات تماماً كما هي لتجنب الفشل\n12. اضغط على Add User وانتظر تحميل القنوات\n13. ستظهر لك الأقسام: Live TV للقنوات المباشرة، Movies للأفلام، Series للمسلسلات\n14. 🎉 مبروك! استمتع بالمشاهدة بجودة تصل لـ 4K", videoUrl: "", downloadUrl: "https://smarterpro.net/android", downloadLabel: "تحميل APK للأندرويد", published: true, order: 1, createdAt: Date.now() },
-  "-a2": { title: "تفعيل IPTV على شاشة سمارت أندرويد (Xiaomi, Sony, وغيرها)", category: "android", type: "activation", steps: "1. من شاشتك الذكية، افتح متجر Google Play\n2. ابحث عن تطبيق Downloader وقم بتثبيته\n3. افتح تطبيق Downloader واضغط على تبويب HOME\n4. سيظهر لك حقل إدخال (URL Bar) لكتابة رابط التحميل\n5. أدخل كود التحميل المباشر: 2322234\n6. أو أدخل رابط تحميل ملف APK المباشر إذا كنت تتصفح من الشاشة\n7. سيبدأ تحميل ملف IPTV Smarters Pro بصيغة APK\n8. بعد اكتمال التحميل، اضغط \"تثبيت\" ووافق على الأذونات\n9. افتح التطبيق واختر ADD YOUR PLAYLIST (via XC API)\n10. أدخل بيانات اشتراكك (اسم المستخدم، كلمة المرور، رابط السيرفر)\n11. اضغط Add User وانتظر تحميل القائمة\n12. 🎉 تم! استمتع بالمشاهدة على شاشتك الكبيرة", videoUrl: "", downloadUrl: "https://smarterpro.net/smart-android-tv", downloadLabel: "تحميل APK للشاشات", published: true, order: 2, createdAt: Date.now() },
+  "-a1": { title: "تفعيل IPTV Smarters Pro على جوال أندرويد", category: "android", type: "activation", steps: "1. حمّل تطبيق IPTV Smarters Pro بصيغة APK من زر التحميل بالأسفل\n2. بعد التحميل، افتح الملف واضغط على \"تثبيت\"\n3. قد يطلب منك الهاتف السماح بالتثبيت من مصادر غير معروفة — وافق عليها\n4. افتح التطبيق وستظهر لك شاشة البداية\n5. اختر خيار ADD YOUR PLAYLIST (via XC API) لإدخال بيانات اشتراكك\n6. ستظهر لك 4 خانات لملء بيانات اشتراكك التي وصلتك بعد الدفع:\n7. 📌 اسم القائمة (Any Name): أدخل أي اسم باللغة الإنجليزية\n8. 📌 اسم المستخدم (Username): أدخل اسم المستخدم الذي تم تزويدك به\n9. 📌 كلمة المرور (Password): ضع كلمة المرور التي تم تزويدك بها\n10. 📌 رابط السيرفر (Server URL): الصق رابط السيرفر كاملاً كما وصلك\n11. ⚠️ مهم: انسخ والصق البيانات تماماً كما هي لتجنب الفشل\n12. اضغط على Add User وانتظر تحميل القنوات\n13. ستظهر لك الأقسام: Live TV للقنوات المباشرة، Movies للأفلام، Series للمسلسلات\n14. 🎉 مبروك! استمتع بالمشاهدة بجودة تصل لـ 4K", videoUrl: "", downloadUrl: "", downloadLabel: "تحميل APK للأندرويد", published: true, order: 1, createdAt: Date.now() },
+  "-a2": { title: "تفعيل IPTV على شاشة سمارت أندرويد (Xiaomi, Sony, وغيرها)", category: "android", type: "activation", steps: "1. من شاشتك الذكية، افتح متجر Google Play\n2. ابحث عن تطبيق Downloader وقم بتثبيته\n3. افتح تطبيق Downloader واضغط على تبويب HOME\n4. سيظهر لك حقل إدخال (URL Bar) لكتابة رابط التحميل\n5. أدخل كود التحميل المباشر: 2322234\n6. أو أدخل رابط تحميل ملف APK المباشر إذا كنت تتصفح من الشاشة\n7. سيبدأ تحميل ملف IPTV Smarters Pro بصيغة APK\n8. بعد اكتمال التحميل، اضغط \"تثبيت\" ووافق على الأذونات\n9. افتح التطبيق واختر ADD YOUR PLAYLIST (via XC API)\n10. أدخل بيانات اشتراكك (اسم المستخدم، كلمة المرور، رابط السيرفر)\n11. اضغط Add User وانتظر تحميل القائمة\n12. 🎉 تم! استمتع بالمشاهدة على شاشتك الكبيرة", videoUrl: "", downloadUrl: "", downloadLabel: "تحميل APK للشاشات", published: true, order: 2, createdAt: Date.now() },
   "-a3": { title: "حل مشكلة التقطيع وبطء البث", category: "android", type: "troubleshoot", steps: "1. 🌐 تأكد من سرعة الإنترنت — يُنصح بسرعة 10 ميجابت على الأقل للبث بجودة عالية\n2. ⚙️ غيّر المشغل الداخلي: ادخل إعدادات التطبيق > Player Selection > جرّب مشغل مختلف\n3. 📡 جرّب الاتصال بشبكة Wi-Fi مختلفة أو استخدم بيانات الجوال للمقارنة\n4. 🔄 أعد تشغيل الراوتر (افصله 30 ثانية ثم أعد تشغيله)\n5. 📺 إذا كنت تستخدم شاشة ذكية، جرّب توصيل كابل إيثرنت بدل الواي فاي\n6. 🧹 امسح ذاكرة التخزين المؤقت للتطبيق: الإعدادات > التطبيقات > IPTV Smarters > مسح الكاش\n7. 🔧 تأكد من أن التطبيق محدّث لآخر إصدار\n8. 📱 تواصل معنا عبر الواتساب إذا استمرت المشكلة", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 5, createdAt: Date.now() },
   "-a4": { title: "طريقة تجديد الاشتراك", category: "android", type: "renewal", steps: "1. ادخل على متجرنا واختر باقة التجديد المناسبة لك\n2. أكمل عملية الدفع (تدعم: بطاقة بنكية، Apple Pay، STC Pay، تابي، تمارا)\n3. ستصلك بيانات التجديد الجديدة عبر الواتساب أو البريد الإلكتروني\n4. افتح تطبيق IPTV Smarters Pro على جهازك\n5. من القائمة الرئيسية، اضغط على أيقونة المستخدم أو Users\n6. احذف المستخدم القديم (اضغط مطولاً > Delete)\n7. أضف مستخدم جديد بالبيانات الجديدة التي وصلتك\n8. اضغط Add User وانتظر تحميل القنوات\n9. ✅ تم التجديد بنجاح!", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 6, createdAt: Date.now() },
   "-b1": { title: "تفعيل IPTV على iPhone و iPad (Smarters Player Lite)", category: "apple", type: "activation", steps: "1. افتح App Store على جهاز iPhone أو iPad\n2. ابحث عن تطبيق Smarters Player Lite (التطبيق المعتمد حالياً لأجهزة iOS)\n3. اضغط \"تحميل\" وانتظر اكتمال التثبيت\n4. افتح التطبيق — ستظهر شاشة الترحيب\n5. وافق على شروط الاستخدام\n6. اختر Login with Xtream Codes API\n7. ستظهر لك خانات إدخال البيانات:\n8. 📌 Any Name: أدخل أي اسم تريده بالإنجليزية\n9. 📌 Username: اسم المستخدم الذي وصلك بعد الدفع\n10. 📌 Password: كلمة المرور التي وصلتك\n11. 📌 Server URL: رابط السيرفر كاملاً (http://...)\n12. ⚠️ مهم: انسخ البيانات من رسالة الواتساب والصقها — لا تكتبها يدوياً\n13. اضغط Add User\n14. انتظر تحميل القنوات والأقسام\n15. 🎉 جاهز! تصفح Live TV و Movies و Series", videoUrl: "", downloadUrl: "https://apps.apple.com/app/smarters-player-lite/id1628995509", downloadLabel: "تحميل من App Store", published: true, order: 1, createdAt: Date.now() },
   "-b2": { title: "تفعيل IPTV على Apple TV", category: "apple", type: "activation", steps: "1. من شاشة Apple TV الرئيسية، افتح App Store\n2. ابحث عن Smarters Player Lite\n3. حمّل التطبيق وافتحه\n4. اختر Login with Xtream Codes API\n5. أدخل بيانات اشتراكك (Username, Password, Server URL)\n6. 💡 نصيحة: استخدم تطبيق Remote على الآيفون لتسهيل كتابة البيانات\n7. اضغط Add User وانتظر التحميل\n8. 🎉 استمتع بالمشاهدة على شاشتك الكبيرة!", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 2, createdAt: Date.now() },
-  "-b3": { title: "تفعيل IPTV على Mac (macOS)", category: "apple", type: "activation", steps: "1. حمّل ملف التثبيت (.dmg) لتطبيق IPTV Smarters Pro من الرابط أدناه\n2. افتح الملف المحمّل وثبّت التطبيق بسحبه لمجلد Applications\n3. افتح التطبيق من Launchpad أو مجلد التطبيقات\n4. قد يظهر تحذير أمان — اذهب لـ System Preferences > Security وأتح التطبيق\n5. اختر Login with Xtream Codes API\n6. أدخل بيانات اشتراكك (اسم المستخدم، كلمة المرور، رابط السيرفر)\n7. اضغط Add User\n8. 🎉 تم التفعيل على جهاز Mac!", videoUrl: "", downloadUrl: "https://smarterpro.net/mac", downloadLabel: "تحميل لنظام macOS (.dmg)", published: true, order: 3, createdAt: Date.now() },
+  "-b3": { title: "تفعيل IPTV على Mac (macOS)", category: "apple", type: "activation", steps: "1. حمّل ملف التثبيت (.dmg) لتطبيق IPTV Smarters Pro من الرابط أدناه\n2. افتح الملف المحمّل وثبّت التطبيق بسحبه لمجلد Applications\n3. افتح التطبيق من Launchpad أو مجلد التطبيقات\n4. قد يظهر تحذير أمان — اذهب لـ System Preferences > Security وأتح التطبيق\n5. اختر Login with Xtream Codes API\n6. أدخل بيانات اشتراكك (اسم المستخدم، كلمة المرور، رابط السيرفر)\n7. اضغط Add User\n8. 🎉 تم التفعيل على جهاز Mac!", videoUrl: "", downloadUrl: "", downloadLabel: "تحميل لنظام macOS (.dmg)", published: true, order: 3, createdAt: Date.now() },
   "-c1": { title: "تفعيل IPTV على شاشة Samsung Smart TV (Tizen OS)", category: "smarttv", type: "activation", steps: "1. 📺 من ريموت شاشة سامسونج، اضغط على زر Home أو Source\n2. انتقل إلى أيقونة Apps (التطبيقات)\n3. في خانة البحث (أيقونة العدسة 🔍)، اكتب: IBO Player\n4. حمّل تطبيق IBO Player من متجر Samsung App Store\n5. افتح التطبيق — سيظهر لك على الشاشة:\n6. 📋 Device ID: رقم تعريف الجهاز\n7. 📋 Key: مفتاح التفعيل\n8. ⚠️ مهم جداً: أرسل لنا Device ID و Key عبر الواتساب\n9. سنقوم بتفعيل اشتراكك على هذا الجهاز خلال دقائق\n10. بعد إبلاغك بالتفعيل، أعد فتح التطبيق من جديد\n11. ستجد أن الاشتراك تم تفعيله وستبدأ القنوات بالتحميل\n12. 🎉 مبروك! استمتع بالمشاهدة على شاشة سامسونج", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 1, createdAt: Date.now() },
   "-c2": { title: "تفعيل IPTV على شاشة LG Smart TV (WebOS)", category: "smarttv", type: "activation", steps: "1. 📺 من الريموت السحري (Magic Remote)، اضغط زر Home\n2. افتح متجر التطبيقات LG Content Store\n3. في قائمة البحث، ابحث عن: IPTV Smarters Pro\n4. اضغط Install لتثبيت التطبيق\n5. ⚠️ إذا لم تجد التطبيق، غيّر منطقة المتجر في إعدادات الشاشة\n6. بعد التثبيت، افتح التطبيق ووافق على الشروط\n7. اختر Login with Xtream Codes API\n8. أدخل بيانات اشتراكك:\n9. 📌 Username: اسم المستخدم\n10. 📌 Password: كلمة المرور\n11. 📌 Server URL: رابط السيرفر\n12. اضغط Add User\n13. 🔄 إذا لم يعمل Smarters، حمّل IBO Player بدلاً منه\n14. أرسل لنا Device ID و Key لتفعيله لك\n15. 🎉 تم! استمتع بالمشاهدة على شاشة LG", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 2, createdAt: Date.now() },
   "-c3": { title: "حل مشكلة عدم ظهور التطبيق في متجر الشاشة", category: "smarttv", type: "troubleshoot", steps: "1. بعض الدول لا تدعم تطبيق IPTV Smarters في متجر الشاشة\n2. الحل: غيّر منطقة/بلد المتجر في إعدادات الشاشة\n3. Samsung: الإعدادات > عام > مدير النظام > اللغة والمنطقة > غيّر البلد\n4. LG: الإعدادات > عام > الموقع > بلد الخدمة > غيّر البلد\n5. جرّب دول مثل: المملكة المتحدة، ألمانيا، أو الولايات المتحدة\n6. بعد التغيير، أعد تشغيل الشاشة\n7. افتح المتجر وابحث مجدداً عن التطبيق\n8. إذا استمرت المشكلة، استخدم IBO Player كبديل\n9. 📱 تواصل معنا عبر الواتساب وسنساعدك", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 3, createdAt: Date.now() },
-  "-d1": { title: "تفعيل IPTV على كمبيوتر ويندوز (Windows)", category: "pc", type: "activation", steps: "1. حمّل ملف التثبيت (.exe) لتطبيق IPTV Smarters Pro من الزر أدناه\n2. افتح الملف المحمّل واتبع خطوات التثبيت\n3. وافق على الشروط > اختر مكان التثبيت > اضغط Install\n4. بعد اكتمال التثبيت، افتح التطبيق من قائمة Start\n5. ستظهر شاشة تسجيل الدخول\n6. اختر Login with Xtream Codes API\n7. أدخل بيانات اشتراكك:\n8. 📌 Any Name: أي اسم بالإنجليزية\n9. 📌 Username: اسم المستخدم\n10. 📌 Password: كلمة المرور\n11. 📌 Server URL: رابط السيرفر\n12. اضغط Add User وانتظر تحميل القنوات\n13. 🎉 تم! شاهد على الكمبيوتر بجودة عالية", videoUrl: "", downloadUrl: "https://smarterpro.net/windows", downloadLabel: "تحميل للويندوز (.exe)", published: true, order: 1, createdAt: Date.now() },
+  "-d1": { title: "تفعيل IPTV على كمبيوتر ويندوز (Windows)", category: "pc", type: "activation", steps: "1. حمّل ملف التثبيت (.exe) لتطبيق IPTV Smarters Pro من الزر أدناه\n2. افتح الملف المحمّل واتبع خطوات التثبيت\n3. وافق على الشروط > اختر مكان التثبيت > اضغط Install\n4. بعد اكتمال التثبيت، افتح التطبيق من قائمة Start\n5. ستظهر شاشة تسجيل الدخول\n6. اختر Login with Xtream Codes API\n7. أدخل بيانات اشتراكك:\n8. 📌 Any Name: أي اسم بالإنجليزية\n9. 📌 Username: اسم المستخدم\n10. 📌 Password: كلمة المرور\n11. 📌 Server URL: رابط السيرفر\n12. اضغط Add User وانتظر تحميل القنوات\n13. 🎉 تم! شاهد على الكمبيوتر بجودة عالية", videoUrl: "", downloadUrl: "", downloadLabel: "تحميل للويندوز (.exe)", published: true, order: 1, createdAt: Date.now() },
   "-d2": { title: "المشاهدة عبر متصفح الويب (بدون تحميل)", category: "pc", type: "activation", steps: "1. يمكنك المشاهدة مباشرة من المتصفح بدون تحميل أي برنامج\n2. افتح المتصفح (Chrome أو Firefox أو Edge)\n3. ادخل على رابط مشغل الويب الخاص بـ IPTV Smarters\n4. اختر طريقة الدخول: Xtream Codes API\n5. أدخل بيانات اشتراكك (Username, Password, Server URL)\n6. اضغط Login\n7. تصفّح القنوات والأفلام والمسلسلات مباشرة من المتصفح\n8. 💡 مثالي للاستخدام السريع أو على أجهزة العمل", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 2, createdAt: Date.now() },
   "-e1": { title: "ما هو IPTV وكيف يعمل؟", category: "android", type: "general", steps: "1. IPTV هو اختصار لـ Internet Protocol Television\n2. تقنية تسمح بنقل القنوات التلفزيونية عبر الإنترنت بدلاً من البث الفضائي\n3. بدلاً من استقبال الإشارة من طبق، تستقبلها عبر اتصالك بالإنترنت\n4. شاهد على أي جهاز ذكي: هاتف، تابلت، كمبيوتر، أو شاشة ذكية\n5. المحتوى: القنوات المباشرة (Live TV)، الأفلام والمسلسلات (VOD)، والرياضة\n6. نحن نقدم اشتراك IPTV بجودة تصل لـ 4K بدون تقطيع\n7. الاشتراك يشمل: تطبيق مجاني + بيانات دخول + دعم فني كامل", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 10, createdAt: Date.now() },
   "-e2": { title: "بيانات الاشتراك — ما هي وأين أجدها؟", category: "android", type: "general", steps: "1. بعد إتمام الشراء، ستصلك بيانات الاشتراك خلال دقائق\n2. البيانات تصلك عبر الواتساب أو البريد الإلكتروني\n3. البيانات تتكون من:\n4. 📌 Username (اسم المستخدم): مثال user12345\n5. 📌 Password (كلمة المرور): مثال pass98765\n6. 📌 Server URL (رابط السيرفر): مثال http://server.example.com:8080\n7. ⚠️ مهم جداً: انسخ والصق البيانات — لا تكتبها يدوياً\n8. استخدم هذه البيانات في أي تطبيق IPTV Smarters على أي جهاز\n9. إذا لم تصلك البيانات، تواصل معنا فوراً عبر الواتساب", videoUrl: "", downloadUrl: "", downloadLabel: "", published: true, order: 11, createdAt: Date.now() },
@@ -437,6 +451,12 @@ const DEMO_HOSTS = {
   "-h1": { name: "السيرفر الرئيسي", url: "http://main.m7tv.vip:8080", port: "8080", note: "السيرفر الأساسي — استخدمه أولاً", active: true, order: 1, createdAt: Date.now() },
   "-h2": { name: "السيرفر الاحتياطي", url: "http://backup.m7tv.vip:8080", port: "8080", note: "استخدمه في حالة توقف السيرفر الرئيسي", active: true, order: 2, createdAt: Date.now() },
   "-h3": { name: "سيرفر DNS", url: "http://dns.m7tv.vip:2086", port: "2086", note: "في حالة حجب السيرفرات عند مزود الخدمة", active: true, order: 3, createdAt: Date.now() },
+};
+
+const DEMO_APPS = {
+  "-app1": { name: "IPTV Smarters Pro", emoji: "📱", color: "#F5C200", steps: "1. حمّل التطبيق من رابط التحميل أدناه أو من المتجر\n2. افتح التطبيق وستظهر شاشة البداية\n3. اختر ADD YOUR PLAYLIST (via XC API)\n4. أدخل بيانات الاشتراك:\n5. 📌 Any Name: أي اسم بالإنجليزية\n6. 📌 Username: اسم المستخدم\n7. 📌 Password: كلمة المرور\n8. 📌 Server URL: رابط السيرفر\n9. اضغط Add User وانتظر تحميل القنوات\n10. 🎉 تم! استمتع بالمشاهدة", downloadUrl: "", downloadLabel: "تحميل التطبيق", active: true, order: 1, createdAt: Date.now() },
+  "-app2": { name: "IBO Player", emoji: "📺", color: "#00B4D8", steps: "1. حمّل تطبيق IBO Player من متجر التطبيقات (Samsung / LG)\n2. افتح التطبيق — سيظهر لك:\n3. 📋 Device ID: رقم تعريف الجهاز\n4. 📋 Key: مفتاح التفعيل\n5. ⚠️ أرسل لنا Device ID و Key عبر الواتساب\n6. سنقوم بتفعيل اشتراكك خلال دقائق\n7. بعد التفعيل، أعد فتح التطبيق\n8. 🎉 ستجد القنوات والمسلسلات جاهزة!", downloadUrl: "", downloadLabel: "تحميل IBO Player", active: true, order: 2, createdAt: Date.now() },
+  "-app3": { name: "Smarters Player Lite", emoji: "🍎", color: "#A2AAAD", steps: "1. افتح App Store على جهاز iPhone أو iPad\n2. ابحث عن Smarters Player Lite\n3. حمّل التطبيق وافتحه\n4. وافق على شروط الاستخدام\n5. اختر Login with Xtream Codes API\n6. أدخل بيانات الاشتراك:\n7. 📌 Any Name: أي اسم بالإنجليزية\n8. 📌 Username: اسم المستخدم\n9. 📌 Password: كلمة المرور\n10. 📌 Server URL: رابط السيرفر\n11. اضغط Add User\n12. 🎉 جاهز!", downloadUrl: "", downloadLabel: "تحميل من App Store", active: true, order: 3, createdAt: Date.now() },
 };
 
 const ADMIN_PIN = "9999";
@@ -494,6 +514,7 @@ function navigate(view, cat, article) {
   state.editingArticle = null;
   state.editingServer = null;
   state.editingHost = null;
+  state.editingApp = null;
   render();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
@@ -641,13 +662,20 @@ function renderArticle() {
       </div>
       <h2>${art.title}</h2>`;
 
-  // Info card showing device & app
+  // Info card showing device & app buttons
   const catObj = CATEGORIES.find(c=>c.id===state.selectedCat);
   const catColor = catObj ? catObj.color : 'var(--accent)';
-  html += `<div style="display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap">
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;background:${catColor}12;border:1px solid ${catColor}30;border-radius:50px;font-size:0.85rem;font-weight:600;color:${catColor}">${ICONS[catObj?.icon||'android']} ${catObj?.label||''}</div>
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(245,194,0,0.08);border:1px solid rgba(245,194,0,0.2);border-radius:50px;font-size:0.85rem;color:var(--accent);font-weight:600">📱 IPTV Smarters Pro</div>
-  </div>`;
+  html += `<div style="display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 16px;background:${catColor}12;border:1px solid ${catColor}30;border-radius:50px;font-size:0.85rem;font-weight:600;color:${catColor}">${ICONS[catObj?.icon||'android']} ${catObj?.label||''}</div>`;
+
+  // Dynamic app buttons from article's appIds
+  const artApps = (art.appIds || []).map(id => ({ id, ...state.apps[id] })).filter(a => a.name && a.active);
+  if (artApps.length > 0) {
+    artApps.forEach(app => {
+      html += `<button onclick="openAppModal('${app.id}')" style="display:flex;align-items:center;gap:8px;padding:8px 18px;background:${app.color||'var(--accent)'}12;border:1px solid ${app.color||'var(--accent)'}35;border-radius:50px;font-size:0.85rem;font-weight:600;color:${app.color||'var(--accent)'};cursor:pointer;font-family:inherit;transition:all 0.2s" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">${app.emoji||'📱'} ${app.name} <span style="font-size:0.7rem;opacity:0.7">شرح ←</span></button>`;
+    });
+  }
+  html += `</div>`;
 
   if (embedUrl) {
     html += `<div style="margin:0 0 28px;border-radius:var(--radius-sm);overflow:hidden;aspect-ratio:16/9">
@@ -695,10 +723,7 @@ function renderArticle() {
     </div>`;
   }
 
-  // Source reference
-  html += `<div style="margin-top:20px;padding:14px 18px;background:var(--bg-secondary);border-radius:10px;border:1px solid var(--border);display:flex;align-items:center;gap:10px;font-size:0.82rem;color:var(--text-muted)">
-    <span style="font-size:1.2rem">📖</span> المصدر: <a href="https://smarterpro.net/activate-guide" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:600">دليل التفعيل الرسمي — smarterpro.net</a>
-  </div>`;
+  // Source reference removed
 
   if (art.downloadUrl) {
     html += `<div class="article-actions"><a href="${art.downloadUrl}" target="_blank" class="btn btn-primary" style="text-decoration:none">${ICONS.download} ${art.downloadLabel || "تحميل"}</a></div>`;
@@ -809,6 +834,36 @@ function copyHost(id, url) {
     }
   });
 }
+
+// ─── App Modal ───
+function openAppModal(appId) {
+  const app = state.apps[appId];
+  if (!app) return;
+  const modal = document.getElementById("app-modal");
+  const title = document.getElementById("app-modal-title");
+  const body = document.getElementById("app-modal-body");
+  title.innerHTML = `${app.emoji||'📱'} شرح ${app.name}`;
+  const steps = parseSteps(app.steps);
+  let h = `<div class="step-list" style="margin-bottom:20px">`;
+  steps.forEach((s, i) => {
+    const isHighlight = s.includes('📌') || s.includes('⚠️');
+    const isSuccess = s.includes('🎉') || s.includes('✅');
+    let bg = '', bd = '';
+    if (isHighlight) { bg = 'background:rgba(245,194,0,0.06);padding:10px 14px;border-radius:10px;'; bd = 'border-right:3px solid var(--accent);'; }
+    if (isSuccess) { bg = 'background:rgba(34,197,94,0.08);padding:10px 14px;border-radius:10px;'; bd = 'border-right:3px solid var(--success);'; }
+    h += `<div class="step-item" style="${bg}${bd}"><div class="step-num" style="${isSuccess?'background:linear-gradient(135deg,var(--success),#16a34a)':''};width:30px;height:30px;font-size:0.8rem">${isSuccess?'✓':(i+1)}</div><div class="step-text" style="font-size:0.92rem">${s}</div></div>`;
+  });
+  h += `</div>`;
+  if (app.downloadUrl) {
+    h += `<a href="${app.downloadUrl}" target="_blank" class="btn btn-primary" style="text-decoration:none;width:100%;justify-content:center">${ICONS.download} ${app.downloadLabel||'تحميل'}</a>`;
+  }
+  body.innerHTML = h;
+  modal.classList.remove("hidden");
+}
+
+function closeAppModal(e) {
+  if (!e || e.target === e.currentTarget) document.getElementById("app-modal").classList.add("hidden");
+}
 function handleAdminAccess() {
   if (state.isAdmin) { navigate("admin"); return; }
   document.getElementById("pin-modal").classList.remove("hidden");
@@ -855,6 +910,7 @@ function renderAdmin() {
     </div>
     <div class="admin-tabs">
       <button class="admin-tab ${state.adminTab==='articles'?'active':''}" onclick="switchAdminTab('articles')">المقالات</button>
+      <button class="admin-tab ${state.adminTab==='apps'?'active':''}" onclick="switchAdminTab('apps')">التطبيقات</button>
       <button class="admin-tab ${state.adminTab==='hosts'?'active':''}" onclick="switchAdminTab('hosts')">الهوستات</button>
       <button class="admin-tab ${state.adminTab==='servers'?'active':''}" onclick="switchAdminTab('servers')">السيرفرات</button>
       <button class="admin-tab ${state.adminTab==='feedback'?'active':''}" onclick="switchAdminTab('feedback')">التقييمات</button>
@@ -899,6 +955,35 @@ function renderAdmin() {
           </div>
         </div>`;
       });
+      html += `</div>`;
+    }
+  } else if (state.adminTab === "apps") {
+    if (state.editingApp !== null) {
+      html += renderAppForm();
+    } else {
+      html += `<div style="display:flex;justify-content:flex-end;margin-bottom:16px"><button class="btn btn-primary btn-sm" onclick="startEditApp(null)">${ICONS.plus} إضافة تطبيق</button></div>`;
+      html += `<div style="display:flex;flex-direction:column;gap:12px">`;
+      Object.entries(state.apps).sort(([,a],[,b])=>(a.order||0)-(b.order||0)).forEach(([id, app]) => {
+        html += `<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:200px">
+            <span style="font-size:1.5rem">${app.emoji||'📱'}</span>
+            <div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <strong>${app.name}</strong>
+                <span style="padding:2px 8px;border-radius:12px;font-size:0.7rem;font-weight:700;background:${app.active?'rgba(34,197,94,0.12)':'rgba(139,149,176,0.12)'};color:${app.active?'var(--success)':'var(--text-muted)'}">${app.active?'فعّال':'معطّل'}</span>
+              </div>
+              <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px">${app.downloadLabel||'بدون رابط تحميل'}</div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-ghost btn-icon btn-sm" onclick="startEditApp('${id}')">${ICONS.edit}</button>
+            <button class="btn btn-danger btn-icon btn-sm" onclick="deleteApp('${id}')">${ICONS.trash}</button>
+          </div>
+        </div>`;
+      });
+      if (Object.keys(state.apps).length === 0) {
+        html += `<div class="empty-state"><p>لا توجد تطبيقات — أضف أول تطبيق</p></div>`;
+      }
       html += `</div>`;
     }
   } else if (state.adminTab === "hosts") {
@@ -985,6 +1070,7 @@ function switchAdminTab(tab) {
   state.editingArticle = null;
   state.editingServer = null;
   state.editingHost = null;
+  state.editingApp = null;
   renderAdmin();
 }
 
@@ -1021,6 +1107,19 @@ function renderArticleForm() {
       <div class="form-group"><label>نص زر التحميل</label><input id="af-dll" value="${a.downloadLabel||''}" placeholder="تحميل التطبيق"></div>
     </div>
     <div class="toggle-row"><span style="font-weight:600">منشور (ظاهر للعملاء)</span><button id="af-pub" class="toggle ${a.published?'on':'off'}" onclick="toggleArticlePub()"></button></div>
+    <div class="form-group" style="margin-top:12px">
+      <label>التطبيقات المرتبطة (تظهر كأزرار شرح في المقال)</label>
+      <div id="af-apps" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+        ${Object.entries(state.apps).map(([id,app]) => {
+          const checked = (a.appIds||[]).includes(id);
+          return `<label style="display:flex;align-items:center;gap:6px;padding:8px 16px;background:${checked?app.color+'18':'var(--bg-secondary)'};border:1px solid ${checked?app.color+'40':'var(--border)'};border-radius:10px;cursor:pointer;font-size:0.88rem;font-weight:600;transition:all 0.2s">
+            <input type="checkbox" value="${id}" ${checked?'checked':''} onchange="toggleArticleApp('${id}')" style="accent-color:${app.color||'var(--accent)'}">
+            <span>${app.emoji||'📱'} ${app.name}</span>
+          </label>`;
+        }).join('')}
+        ${Object.keys(state.apps).length===0?'<span style="color:var(--text-muted);font-size:0.85rem">لا توجد تطبيقات — أضف تطبيقات من تاب التطبيقات أولاً</span>':''}
+      </div>
+    </div>
     <div style="display:flex;gap:12px;margin-top:20px">
       <button class="btn btn-primary" onclick="saveArticle()">حفظ</button>
       <button class="btn btn-ghost" onclick="state.editingArticle=null;renderAdmin()">إلغاء</button>
@@ -1030,6 +1129,14 @@ function renderArticleForm() {
 
 function toggleArticlePub() {
   state.editingArticle.published = !state.editingArticle.published;
+  renderAdmin();
+}
+
+function toggleArticleApp(appId) {
+  if (!state.editingArticle.appIds) state.editingArticle.appIds = [];
+  const idx = state.editingArticle.appIds.indexOf(appId);
+  if (idx > -1) state.editingArticle.appIds.splice(idx, 1);
+  else state.editingArticle.appIds.push(appId);
   renderAdmin();
 }
 
@@ -1045,6 +1152,7 @@ async function saveArticle() {
     downloadLabel: document.getElementById("af-dll").value,
     order: parseInt(document.getElementById("af-order").value) || 1,
     published: a.published,
+    appIds: a.appIds || [],
     createdAt: a.createdAt || Date.now(),
   };
   if (!data.title.trim()) return;
@@ -1188,6 +1296,74 @@ async function deleteHost(id) {
   renderAdmin();
 }
 
+// ─── App CRUD ───
+function startEditApp(id) {
+  if (id) {
+    state.editingApp = { ...state.apps[id], _id: id };
+  } else {
+    state.editingApp = { name:"", emoji:"📱", color:"#F5C200", steps:"", downloadUrl:"", downloadLabel:"", active:true, order:1 };
+  }
+  renderAdmin();
+}
+
+function renderAppForm() {
+  const a = state.editingApp;
+  const isEdit = a._id ? true : false;
+  return `<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:28px">
+    <h3 style="margin-bottom:20px;font-weight:700">${isEdit?'تعديل التطبيق':'إضافة تطبيق جديد'}</h3>
+    <div class="form-row">
+      <div class="form-group"><label>اسم التطبيق</label><input id="apf-name" value="${a.name}" placeholder="مثل: IPTV Smarters Pro"></div>
+      <div class="form-group"><label>الإيموجي</label><input id="apf-emoji" value="${a.emoji||''}" placeholder="📱" style="font-size:1.5rem;text-align:center"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>اللون (hex)</label><input id="apf-color" type="color" value="${a.color||'#F5C200'}" style="height:45px;cursor:pointer"></div>
+      <div class="form-group"><label>ترتيب العرض</label><input id="apf-order" type="number" value="${a.order||1}"></div>
+    </div>
+    <div class="form-group"><label>خطوات شرح التطبيق (سطر لكل خطوة)</label><textarea id="apf-steps" placeholder="1. حمّل التطبيق\n2. افتحه\n3. أدخل البيانات">${a.steps||''}</textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>رابط التحميل (اختياري)</label><input id="apf-dl" value="${a.downloadUrl||''}" placeholder="https://..." style="direction:ltr;text-align:left"></div>
+      <div class="form-group"><label>نص زر التحميل</label><input id="apf-dll" value="${a.downloadLabel||''}" placeholder="تحميل التطبيق"></div>
+    </div>
+    <div class="toggle-row"><span style="font-weight:600">فعّال</span><button id="apf-active" class="toggle ${a.active?'on':'off'}" onclick="state.editingApp.active=!state.editingApp.active;renderAdmin()"></button></div>
+    <div style="display:flex;gap:12px;margin-top:20px">
+      <button class="btn btn-primary" onclick="saveApp()">حفظ</button>
+      <button class="btn btn-ghost" onclick="state.editingApp=null;renderAdmin()">إلغاء</button>
+    </div>
+  </div>`;
+}
+
+async function saveApp() {
+  const a = state.editingApp;
+  const data = {
+    name: document.getElementById("apf-name").value,
+    emoji: document.getElementById("apf-emoji").value,
+    color: document.getElementById("apf-color").value,
+    steps: document.getElementById("apf-steps").value,
+    downloadUrl: document.getElementById("apf-dl").value,
+    downloadLabel: document.getElementById("apf-dll").value,
+    order: parseInt(document.getElementById("apf-order").value) || 1,
+    active: a.active,
+    createdAt: a.createdAt || Date.now(),
+  };
+  if (!data.name.trim()) return;
+  if (a._id) {
+    await fbSet(`apps/${a._id}`, data);
+    state.apps[a._id] = data;
+  } else {
+    const res = await fbPush("apps", data);
+    state.apps[res.name] = data;
+  }
+  state.editingApp = null;
+  renderAdmin();
+}
+
+async function deleteApp(id) {
+  if (!confirm("هل تريد حذف هذا التطبيق؟")) return;
+  await fbDelete(`apps/${id}`);
+  delete state.apps[id];
+  renderAdmin();
+}
+
 // ─── Settings ───
 async function saveSettings() {
   const data = {
@@ -1237,6 +1413,14 @@ async function init() {
   } else {
     await fbSet("hosts", DEMO_HOSTS);
     state.hosts = DEMO_HOSTS;
+  }
+
+  const appData = await fbGet("apps");
+  if (appData && Object.keys(appData).length > 0) {
+    state.apps = appData;
+  } else {
+    await fbSet("apps", DEMO_APPS);
+    state.apps = DEMO_APPS;
   }
 
   const fb = await fbGet("feedback");
